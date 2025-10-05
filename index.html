@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rogue LX App - Fully Responsive</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for Icons (Required for the design) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <!-- Google Font: Inter (for general text) and Oswald (for title) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        /* -------------------- CSS Variables for THEMES -------------------- */
+        :root {
+            /* Shared Colors */
+            --color-primary-accent: #8a2be2; /* Blue Violet */
+            --color-secondary: #c080ff; /* Lighter Purple */
+            
+            /* Dark Mode Defaults */
+            --color-background: #10061e; /* Very Dark Purple Background */
+            --color-dark-purple: #1e0b35; /* Darker Purple Card/Input BG */
+            --color-text: white;
+            --color-text-faded: #ccc;
+            --color-border: #2a1542;
+            --color-shadow: rgba(138, 43, 226, 0.4);
+            --color-body-bg: #000; /* The black background outside the main container */
+        }
+
+        /* Light Mode Overrides: Applied to .app-container.light-mode */
+        .light-mode {
+            --color-background: #f0f0f5; /* Light Gray/Blue Primary Background */
+            --color-dark-purple: #ffffff; /* White card/input background */
+            --color-primary-accent: #6a1db9; /* Darker Rich Violet Accent (for visibility) */
+            --color-secondary: #9c4cff; /* Light Accent Purple */
+            --color-text: #10061e; /* Dark text */
+            --color-text-faded: #333;
+            --color-border: #d0d0d0;
+            --color-shadow: rgba(106, 29, 185, 0.3); /* Darker purple shadow */
+            --color-body-bg: #e0e0e0; /* Lighter background outside the main container */
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-body-bg); /* Use variable */
+        }
+        
+        /* -------------------- SCROLLBAR HIDING (NEW) -------------------- */
+        /* Hide scrollbar for all relevant scrollable containers: Webkit (Chrome/Safari) */
+        .app-container::-webkit-scrollbar, 
+        .page::-webkit-scrollbar,
+        .notif-modal-content::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Hide scrollbar for IE, Edge, and Firefox */
+        .app-container, .page, .notif-modal-content {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        /* -------------------- CORE APP CONTAINER -------------------- */
+        .app-container {
+            width: 100%; 
+            min-height: 100vh;
+            margin: 0 auto;
+            position: relative;
+            background-color: var(--color-background); /* Use variable */
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+            overflow-x: hidden;
+            color: var(--color-text); /* Use variable */
+        }
+        
+        @media (min-width: 1024px) {
+            .app-container {
+                max-width: 1200px; 
+            }
+        }
+        
+        /* -------------------- Hexagonal Pattern Background -------------------- */
+        .hex-bg-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+            opacity: 1; 
+            transition: background-color 0.3s;
+        }
+
+        .hex-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1; /* Consistent low opacity for pattern */
+            background: repeating-linear-gradient(
+                45deg,
+                var(--color-primary-accent) 0px,
+                var(--color-primary-accent) 5px,
+                transparent 5px,
+                transparent 10px
+            ),
+            repeating-linear-gradient(
+                -45deg,
+                var(--color-primary-accent) 0px,
+                var(--color-primary-accent) 5px,
+                transparent 5px,
+                transparent 10px
+            );
+        }
+
+        /* -------------------- Header & Icons -------------------- */
+        .app-title {
+            font-family: 'Oswald', sans-serif;
+            font-weight: 700;
+            font-size: 1.8rem;
+            letter-spacing: 0.25em; /* Increased tracking for design match */
+            color: var(--color-text);
+            position: relative;
+            padding-bottom: 5px;
+        }
+
+        .app-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, var(--color-primary-accent), transparent);
+            box-shadow: 0 0 10px var(--color-primary-accent);
+        }
+
+        .header-icon {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: var(--color-secondary);
+            border: 1px solid var(--color-primary-accent);
+            background-color: var(--color-dark-purple);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            transition: background-color 0.2s, box-shadow 0.2s;
+            position: relative;
+        }
+        
+        .header-icon:hover {
+            box-shadow: 0 0 15px var(--color-shadow);
+        }
+
+        .notification-dot {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 8px;
+            height: 8px;
+            background-color: #ff5277; /* Hot pink/red for notification */
+            border-radius: 50%;
+            border: 1px solid var(--color-dark-purple);
+        }
+
+        /* Search Bar */
+        .search-container {
+            position: relative;
+            max-width: 500px; 
+            margin: 0 auto 1.5rem;
+        }
+        .search-input {
+            width: 100%;
+            padding: 1rem 1.5rem 1rem 3.5rem; 
+            border-radius: 9999px;
+            background-color: var(--color-dark-purple);
+            border: 1px solid var(--color-border);
+            color: var(--color-text);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--color-primary-accent);
+            box-shadow: 0 0 8px var(--color-shadow);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1.2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--color-secondary);
+            font-size: 1.2rem;
+            pointer-events: none;
+        }
+
+
+        /* -------------------- Page Styling -------------------- */
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            min-height: 100%;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out;
+            padding-bottom: 80px; /* Space for the bottom nav */
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .page.active {
+            opacity: 1;
+            pointer-events: all;
+            position: relative;
+        }
+        
+        .main-page-content {
+            padding: 1rem 1.25rem 2rem 1.25rem; /* Consistent side padding */
+        }
+        
+        /* Auth Overlay (Intro, Sign In, Sign Up) */
+        .auth-overlay {
+            /* ... existing auth styles ... */
+            min-height: 100vh;
+            background-image: url('https://placehold.co/1200x800/10061e/8a2be2?text=ROGUE+LX+BACKGROUND');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+        .auth-content {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 3rem 2rem;
+            border-radius: 1rem;
+            border: 2px solid var(--color-primary-accent);
+            box-shadow: 0 0 30px rgba(138, 43, 226, 0.6);
+            backdrop-filter: blur(5px);
+            max-width: 450px;
+            width: 90%;
+        }
+        .auth-title {
+            font-family: 'Oswald', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: 0.3em;
+            color: var(--color-secondary);
+            margin-bottom: 2rem;
+            text-shadow: 0 0 10px var(--color-primary-accent);
+        }
+        .auth-input, .auth-button {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+        }
+        .auth-input {
+            background-color: var(--color-dark-purple);
+            border: 1px solid var(--color-border);
+            color: var(--color-text);
+        }
+        .auth-button {
+            background-color: var(--color-primary-accent);
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 4px 20px var(--color-shadow);
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+        .auth-button:hover {
+            background-color: color-mix(in srgb, var(--color-primary-accent) 90%, black);
+        }
+
+
+        /* Highlight Card */
+        .highlight-image-placeholder {
+            width: 100%;
+            height: 200px;
+            background-color: var(--color-dark-purple);
+            border-radius: 0.75rem;
+            overflow: hidden;
+            position: relative;
+            background-image: url('https://placehold.co/800x400/1e0b35/8a2be2?text=KPOP+DEMON+HUNTERS');
+            background-size: cover;
+            background-position: center;
+            border: 2px solid var(--color-primary-accent);
+            box-shadow: 0 0 15px var(--color-shadow);
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-start;
+        }
+
+        .highlight-text-overlay {
+            padding: 1rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1.2;
+            color: white;
+            font-family: 'Oswald', sans-serif;
+            text-shadow: 0 0 10px var(--color-primary-accent), 0 0 5px black;
+        }
+
+        /* Movie Cards */
+        .movie-card-wrapper {
+            position: relative;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.3s;
+        }
+
+        .movie-card-wrapper:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px var(--color-shadow);
+        }
+
+        .movie-card-thumb {
+            width: 100%;
+            padding-bottom: 150%; /* 2:3 aspect ratio */
+            background-size: cover;
+            background-position: center;
+            border-radius: 0.5rem;
+            transition: opacity 0.3s;
+        }
+
+        .watchlist-toggle-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            z-index: 20;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .watchlist-toggle-btn i {
+            color: var(--color-text-faded);
+            font-size: 14px;
+            transition: color 0.2s, filter 0.2s;
+        }
+        
+        .watchlist-toggle-btn.saved i {
+            color: #ff5277; /* Keep the pink accent for 'saved' */
+            filter: drop-shadow(0 0 3px var(--color-primary-accent));
+        }
+        
+        /* Favorites/Downloads center content */
+        .center-message {
+            text-align: center;
+            padding-top: 5rem;
+        }
+        .center-icon {
+            font-size: 5rem;
+            color: var(--color-secondary);
+            text-shadow: 0 0 10px var(--color-primary-accent);
+            margin-bottom: 1rem;
+        }
+
+        /* -------------------- Bottom Navigation -------------------- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 30;
+            display: flex;
+            justify-content: space-around;
+            padding: 0.75rem 0;
+            
+            /* Use linear gradient for the fade up effect */
+            background: linear-gradient(to top, var(--color-dark-purple) 70%, color-mix(in srgb, var(--color-dark-purple) 90%, transparent) 100%);
+            border-top: 1px solid var(--color-border);
+            box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-link {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+            border-radius: 50%;
+            color: var(--color-text-faded);
+            transition: color 0.3s, background 0.3s, border 0.3s, transform 0.1s;
+            position: relative;
+            z-index: 2;
+        }
+
+        .nav-link.active {
+            color: var(--color-text);
+            /* Radial background effect for active state */
+            background: radial-gradient(circle at center, var(--color-primary-accent) 0%, var(--color-primary-accent) 30%, transparent 70%);
+            box-shadow: 0 0 15px var(--color-shadow);
+            border: 3px solid var(--color-text);
+        }
+
+        /* -------------------- Profile Toggles -------------------- */
+        .profile-section-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--color-border);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .profile-section-item:hover {
+            background-color: color-mix(in srgb, var(--color-dark-purple) 80%, transparent);
+        }
+
+        .toggle-switch {
+            width: 50px;
+            height: 25px;
+            background-color: var(--color-text-faded);
+            border-radius: 9999px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .toggle-switch.active {
+            background-color: var(--color-primary-accent);
+        }
+        .toggle-switch-inner {
+            position: absolute;
+            left: 2px;
+            top: 2px;
+            width: 21px;
+            height: 21px;
+            background-color: var(--color-dark-purple);
+            border-radius: 50%;
+            transition: transform 0.3s, background-color 0.3s;
+        }
+        .toggle-switch.active .toggle-switch-inner {
+            transform: translateX(25px);
+            background-color: white; 
+        }
+        
+        /* -------------------- Notification Modal Styles -------------------- */
+        #notification-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: none; /* Controlled by JS */
+            align-items: flex-end;
+            justify-content: center;
+            overflow-y: hidden;
+        }
+
+        .notif-modal-content {
+            width: 100%;
+            max-height: 85vh;
+            background-color: var(--color-background);
+            border-top-left-radius: 1.5rem;
+            border-top-right-radius: 1.5rem;
+            border-top: 2px solid var(--color-primary-accent);
+            padding: 1.5rem 1.25rem;
+            box-shadow: 0 -5px 30px var(--color-shadow);
+            overflow-y: auto;
+            
+            /* Slide-up transition properties */
+            transform: translateY(100%);
+            transition: transform 0.4s ease-out;
+        }
+
+        #notification-modal.active .notif-modal-content {
+            transform: translateY(0);
+        }
+        
+        /* Notification Card Styling */
+        .notif-card {
+            background-color: var(--color-dark-purple);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--color-border);
+            transition: background-color 0.2s, transform 0.1s;
+        }
+
+        .notif-card:hover {
+             background-color: color-mix(in srgb, var(--color-dark-purple) 90%, black); 
+             transform: translateY(-2px);
+        }
+
+        .notif-card p {
+            color: var(--color-text);
+        }
+        .notif-card .font-semibold {
+            color: var(--color-secondary);
+        }
+        
+        /* Watch Page Styles */
+        .watch-page-content {
+             padding: 1rem 1.25rem 2rem 1.25rem; 
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- Persistent Hexagonal Background -->
+        <div class="hex-bg-container">
+            <div class="hex-overlay"></div>
+        </div>
+        
+        <!-- UI Message Box (Toast) -->
+        <div id="ui-message-box" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-900 border-2 border-purple-600 rounded-lg p-6 shadow-2xl z-[1001] hidden transition-opacity duration-300 w-11/12 max-w-sm">
+            <p id="ui-message-text" class="text-white text-lg font-semibold text-center"></p>
+        </div>
+
+        <!-- Confirmation Modal (Custom UI to replace confirm()) -->
+        <div id="confirmation-modal" class="fixed inset-0 bg-black bg-opacity-80 z-[2000] hidden flex justify-center items-center">
+            <div class="w-11/12 max-w-sm bg-gray-900 border-2 border-purple-600 rounded-xl p-6 shadow-2xl space-y-4">
+                <h3 id="conf-title" class="text-xl font-bold text-white mb-2 border-b border-purple-800 pb-2"></h3>
+                <p id="conf-message" class="text-gray-300"></p>
+                <div class="flex justify-between gap-4 pt-4">
+                    <button id="conf-btn-no" class="auth-button w-1/2 bg-gray-700 text-sm py-3 transition hover:bg-gray-600 shadow-none">No</button>
+                    <button id="conf-btn-yes" class="auth-button w-1/2 bg-purple-600 text-sm py-3 transition hover:bg-purple-700">Yes</button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Bottom Navigation (Nav only shows on Home, Favorites, Downloads pages) -->
+        <nav id="bottom-nav" class="bottom-nav hidden">
+            <a data-page="favorites" class="nav-link" onclick="navigateTo('favorites')">
+                <i class="fa-regular fa-heart"></i>
+            </a>
+            <a data-page="home" class="nav-link active" onclick="navigateTo('home')">
+                <i class="fa-solid fa-house"></i>
+            </a>
+            <a data-page="downloads" class="nav-link" onclick="navigateTo('downloads')">
+                <i class="fa-solid fa-download"></i>
+            </a>
+        </nav>
+
+        <!-- -------------------- 1. INTRO PAGE -------------------- -->
+        <div id="intro" class="page active">
+            <div class="auth-overlay">
+                <div class="auth-content text-center">
+                    <h1 class="auth-title">ROGUE LX</h1>
+                    <button class="auth-button" onclick="navigateTo('login')">Sign In</button>
+                    <div class="text-white text-lg font-bold my-4">
+                        <span class="w-1/4 inline-block h-px bg-white opacity-20"></span> or <span class="w-1/4 inline-block h-px bg-white opacity-20"></span>
+                    </div>
+                    <button class="auth-button" onclick="navigateTo('register')">Sign Up</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- -------------------- 2. SIGN IN PAGE -------------------- -->
+        <div id="login" class="page">
+            <div class="auth-overlay pt-20">
+                <div class="auth-content text-center">
+                    <input type="text" placeholder="Username" class="auth-input">
+                    <input type="password" placeholder="Password" class="auth-input">
+                    <button class="auth-button" onclick="navigateTo('home')">Sign In</button>
+                    <p class="text-white mt-4 text-sm">
+                        Create an account? <a href="#" class="text-yellow-400 font-bold" onclick="navigateTo('register')">Sign up</a> Now!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- -------------------- 3. SIGN UP PAGE -------------------- -->
+        <div id="register" class="page">
+            <div class="auth-overlay pt-20">
+                <div class="auth-content text-center">
+                    <input type="text" placeholder="Username" class="auth-input">
+                    <input type="email" placeholder="E-mail" class="auth-input">
+                    <input type="password" placeholder="Password" class="auth-input">
+                    <input type="password" placeholder="Confirm password" class="auth-input">
+                    <button class="auth-button" onclick="navigateTo('home')">Sign Up</button>
+                    <p class="text-white mt-4 text-sm">
+                        Already have an account? <a href="#" class="text-yellow-400 font-bold" onclick="navigateTo('login')">Sign in</a> Now!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- -------------------- 4. HOME PAGE -------------------- -->
+        <div id="home" class="page">
+            <!-- Header -->
+            <header class="flex justify-between items-center px-5 py-4 relative z-20">
+                <a class="header-icon" onclick="navigateTo('profile')">
+                    <i class="fa-solid fa-user"></i>
+                </a>
+                <h1 class="app-title">ROGUE LX</h1>
+                <!-- Updated to open modal -->
+                <a class="header-icon" onclick="openNotificationModal()">
+                    <i class="fa-solid fa-bell"></i>
+                    <span class="notification-dot"></span>
+                </a>
+            </header>
+
+            <div class="main-page-content">
+                <!-- Search Bar -->
+                <section class="search-container">
+                    <input type="text" placeholder="Search" class="search-input">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                </section>
+
+                <!-- Highlights Section (STATIC) -->
+                <section class="mb-8">
+                    <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                        <span class="w-2 h-2 bg-purple-400 rounded-full"></span>Highlights
+                    </h2>
+                    <div class="highlight-image-placeholder shadow-xl">
+                        <div class="highlight-text-overlay">
+                            KPOP <br> DEMON HUNTERS
+                        </div>
+                    </div>
+                    <div class="flex justify-center gap-2 mt-4">
+                        <span class="w-4 h-2 bg-purple-500 rounded-lg"></span>
+                        <span class="w-2 h-2 bg-gray-600 rounded-full"></span>
+                        <span class="w-2 h-2 bg-gray-600 rounded-full"></span>
+                        <span class="w-2 h-2 bg-gray-600 rounded-full"></span>
+                    </div>
+                </section>
+
+                <!-- New Movies Section (DYNAMICALLY POPULATED) -->
+                <section class="mb-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold flex items-center gap-2">
+                            <span class="w-2 h-2 bg-purple-400 rounded-full"></span>New Movies
+                        </h2>
+                        <a href="#" class="text-purple-400 text-sm font-semibold">See All</a>
+                    </div>
+                    <div id="new-movies-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+                        <!-- Content rendered by JS -->
+                    </div>
+                </section>
+
+                <!-- Coming Soon Section (DYNAMICALLY POPULATED) -->
+                <section class="mb-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold flex items-center gap-2">
+                            <span class="w-2 h-2 bg-purple-400 rounded-full"></span>Coming Soon
+                        </h2>
+                        <a href="#" class="text-purple-400 text-sm font-semibold">See All</a>
+                    </div>
+                    <div id="coming-soon-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+                         <!-- Content rendered by JS -->
+                    </div>
+                </section>
+
+                <!-- Trending Series Section (DYNAMICALLY POPULATED) -->
+                <section class="mb-8">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-bold flex items-center gap-2">
+                            <span class="w-2 h-2 bg-purple-400 rounded-full"></span>Trending Series
+                        </h2>
+                        <a href="#" class="text-purple-400 text-sm font-semibold">See All</a>
+                    </div>
+                    <div id="trending-series-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+                        <!-- Content rendered by JS -->
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- -------------------- 5. FAVORITES PAGE (WATCHLIST) -------------------- -->
+        <div id="favorites" class="page">
+            <!-- Header (Simplified) -->
+            <header class="flex justify-start items-center px-5 py-4 relative z-20">
+                <a class="header-icon" onclick="navigateTo('home')">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+            </header>
+            <div class="main-page-content mt-[-20px]">
+                <h1 class="text-4xl font-extrabold mb-6 font-['Oswald'] tracking-wider">WATCHLIST</h1>
+                <!-- Search Bar -->
+                <section class="search-container">
+                    <input type="text" placeholder="Search Watchlist" class="search-input w-full">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                </section>
+                
+                <div id="favorites-content-area" class="min-h-[60vh]">
+                    <!-- Dynamic content will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- -------------------- 6. DOWNLOADS PAGE -------------------- -->
+        <div id="downloads" class="page">
+            <!-- Header (Simplified) -->
+            <header class="flex justify-start items-center px-5 py-4 relative z-20">
+                <a class="header-icon" onclick="navigateTo('home')">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+            </header>
+            <div class="main-page-content mt-[-20px]">
+                <h1 class="text-4xl font-extrabold mb-6 font-['Oswald'] tracking-wider">DOWNLOADS</h1>
+                <section class="search-container">
+                    <input type="text" placeholder="Search" class="search-input">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                </section>
+                <div class="center-message">
+                    <i class="fa-solid fa-download center-icon"></i>
+                    <p class="text-2xl text-gray-400">No Downloaded</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- -------------------- 7. NOTIFICATIONS MODAL (NEW STRUCTURE) -------------------- -->
+        <div id="notification-modal" onclick="closeNotificationModal(event)">
+            <div class="notif-modal-content" onclick="event.stopPropagation()">
+                <header class="flex justify-between items-center pb-4 mb-4 border-b border-gray-700">
+                    <h1 class="text-3xl font-bold font-['Oswald'] tracking-wider">MESSAGES</h1>
+                    <button class="header-icon !bg-transparent !border-none" onclick="closeNotificationModal()">
+                        <i class="fa-solid fa-xmark text-white text-3xl"></i>
+                    </button>
+                </header>
+                
+                <!-- Notification Card 1 -->
+                <div class="notif-card" onclick="showUiMessage('Tapping Movie update notification.')">
+                    <div class="flex justify-between">
+                        <p class="text-lg font-semibold">Movie update</p>
+                        <span class="text-sm text-gray-400">3 minutes ago</span>
+                    </div>
+                    <p class="text-gray-400">The Conjuring:Last Rites is now available for streaming!</p>
+                </div>
+                
+                <!-- Notification Card 2 -->
+                <div class="notif-card" onclick="showUiMessage('Tapping App update notification.')">
+                    <div class="flex justify-between">
+                        <p class="text-lg font-semibold">About Application</p>
+                        <span class="text-sm text-gray-400">10 minutes ago</span>
+                    </div>
+                    <p class="text-gray-400">Version 01.20 is out, update now to get the latest features.</p>
+                </div>
+
+                <!-- Example Notification Card 3 -->
+                <div class="notif-card" onclick="showUiMessage('Tapping System message notification.')">
+                    <div class="flex justify-between">
+                        <p class="text-lg font-semibold">System Alert</p>
+                        <span class="text-sm text-gray-400">1 hour ago</span>
+                    </div>
+                    <p class="text-gray-400">Your monthly subscription payment has been processed successfully.</p>
+                </div>
+                
+                <div class="notif-card" onclick="showUiMessage('Tapping New Season update.')">
+                    <div class="flex justify-between">
+                        <p class="text-lg font-semibold">New Season!</p>
+                        <span class="text-sm text-gray-400">4 hours ago</span>
+                    </div>
+                    <p class="text-gray-400">The third season of 'The Game' is now available to watch!</p>
+                </div>
+                
+                <div class="notif-card" onclick="showUiMessage('Tapping Promo notification.')">
+                    <div class="flex justify-between">
+                        <p class="text-lg font-semibold">Special Offer</p>
+                        <span class="text-sm text-gray-400">1 day ago</span>
+                    </div>
+                    <p class="text-gray-400">Get 1 month free when you refer a friend!</p>
+                </div>
+                
+                <div class="text-center mt-6">
+                     <button class="text-sm text-purple-400 hover:text-purple-300 font-semibold" onclick="showUiMessage('Marking all as read.')">Mark all as read</button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- -------------------- 8. PROFILE PAGE -------------------- -->
+        <div id="profile" class="page">
+            <!-- Header (Back Button) -->
+            <header class="flex justify-start items-center px-5 py-4 relative z-20">
+                <a class="header-icon" onclick="navigateTo('home')">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+            </header>
+
+            <div class="main-page-content text-center pt-8">
+                <div class="w-32 h-32 rounded-full mx-auto bg-purple-600 border-4 border-white flex justify-center items-center shadow-lg">
+                    <i class="fa-solid fa-user text-6xl text-white opacity-80"></i>
+                </div>
+                
+                <div class="mt-8 text-left max-w-xs mx-auto text-lg space-y-2">
+                    <p>Username : <span class="font-semibold text-purple-300">Lexy</span></p>
+                    <p>E-mail : <span class="font-semibold text-purple-300">blexykateo@gmail.com</span></p>
+                </div>
+                
+                <div class="mt-10 max-w-xs mx-auto border-t border-b border-[#333]">
+                    <!-- DARK MODE TOGGLE (NOW INTERACTIVE AND THEME-SWITCHING) -->
+                    <div class="profile-section-item">
+                        <div class="flex items-center gap-4 text-lg">
+                            <i class="fa-solid fa-moon text-purple-400 w-6"></i>
+                            <span>Dark Mode</span>
+                        </div>
+                        <div id="dark-mode-toggle" class="toggle-switch active" onclick="toggleDarkMode()">
+                            <div class="toggle-switch-inner"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-section-item" onclick="showUiMessage('Profile Details feature is not yet implemented.')">
+                        <div class="flex items-center gap-4 text-lg">
+                            <i class="fa-solid fa-list-check text-purple-400 w-6"></i>
+                            <span>Profile Details</span>
+                        </div>
+                        <i class="fa-solid fa-angle-right text-gray-500"></i>
+                    </div>
+                    
+                    <div class="profile-section-item" onclick="showUiMessage('Settings feature is not yet implemented.')">
+                        <div class="flex items-center gap-4 text-lg">
+                            <i class="fa-solid fa-gear text-purple-400 w-6"></i>
+                            <span>Settings</span>
+                        </div>
+                        <i class="fa-solid fa-angle-right text-gray-500"></i>
+                    </div>
+                    
+                    <div class="profile-section-item" onclick="showUiMessage('History feature is not yet implemented.')">
+                        <div class="flex items-center gap-4 text-lg">
+                            <i class="fa-solid fa-book text-purple-400 w-6"></i>
+                            <span>History</span>
+                        </div>
+                        <i class="fa-solid fa-angle-right text-gray-500"></i>
+                    </div>
+                    
+                    <div class="profile-section-item" onclick="handleLogoutClick()">
+                        <div class="flex items-center gap-4 text-lg">
+                            <i class="fa-solid fa-right-from-bracket text-red-400 w-6"></i>
+                            <span class="text-red-400 font-semibold">Log out</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- -------------------- 9. WATCH PAGE -------------------- -->
+        <div id="watch" class="page">
+            <!-- Header (Back Button) -->
+            <header class="flex justify-start items-center px-5 py-4 relative z-20">
+                <a class="header-icon" onclick="navigateTo('home')">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+            </header>
+            
+            <!-- Video Player (Dynamically controlled via iframe pointing to a video embed URL) -->
+            <div id="video-player-container" class="bg-black h-[250px] relative">
+                <iframe id="video-player-iframe" width="100%" height="100%" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            </div>
+
+            <div class="watch-page-content pt-4">
+                <!-- Movie Details (Dynamically populated) -->
+                <div class="mb-6">
+                    <h1 id="watch-movie-title" class="text-3xl font-extrabold text-white mb-2"></h1>
+                    <p class="text-purple-400 font-semibold mb-2">
+                        <span id="watch-movie-year"></span> | Action, Sci-Fi | <span class="bg-yellow-500 text-black px-2 py-0.5 rounded-md text-xs font-bold">IMDB 8.5</span>
+                    </p>
+                    <p id="watch-movie-description" class="text-gray-400 text-sm"></p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-around items-center mb-8 border-b border-[#333] pb-6">
+                    <button id="watch-watchlist-btn" class="flex flex-col items-center text-purple-300 hover:text-purple-500 transition">
+                        <i class="fa-regular fa-heart text-2xl"></i>
+                        <span class="text-xs mt-1">Watchlist</span>
+                    </button>
+                    <button class="flex flex-col items-center text-purple-300 hover:text-purple-500 transition" onclick="showUiMessage('Download feature is not available.')">
+                        <i class="fa-solid fa-download text-2xl"></i>
+                        <span class="text-xs mt-1">Download</span>
+                    </button>
+                    <button class="flex flex-col items-center text-purple-300 hover:text-purple-500 transition" onclick="showUiMessage('Share feature is not available.')">
+                        <i class="fa-solid fa-share-nodes text-2xl"></i>
+                        <span class="text-xs mt-1">Share</span>
+                    </button>
+                </div>
+
+                <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                    <span class="w-2 h-2 bg-purple-400 rounded-full"></span>You may also like
+                </h2>
+                
+                <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+                    <!-- Placeholder "You may also like" section -->
+                    <div class="movie-card-wrapper" onclick="watchMovie('M-7')">
+                        <div class="movie-card-thumb" style="background-image: url('https://placehold.co/200x300/1e0b35/8a2be2?text=SUIT');"></div>
+                    </div>
+                    <div class="movie-card-wrapper" onclick="watchMovie('M-8')">
+                        <div class="movie-card-thumb" style="background-image: url('https://placehold.co/200x300/1e0b35/8a2be2?text=STARFALL');"></div>
+                    </div>
+                    <div class="movie-card-wrapper" onclick="watchMovie('M-9')">
+                        <div class="movie-card-thumb" style="background-image: url('https://placehold.co/200x300/1e0b35/8a2be2?text=OMEGA+7');"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FLOATING ACTION BUTTON (FAB) - Hidden by default -->
+        <button id="floating-add-btn" 
+            class="fixed bottom-[80px] right-4 w-14 h-14 rounded-full bg-purple-600 text-white text-2xl shadow-xl transition hover:bg-purple-700 flex justify-center items-center z-50 hidden" 
+            onclick="navigateTo('home')"
+        >
+            <i class="fa-solid fa-plus"></i>
+        </button>
+        <!-- END FAB -->
+
+    </div>
+
+    <script type="module">
+        // Import Firebase functions for the Canvas environment
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, deleteDoc, onSnapshot, collection, query, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Firebase and App State variables
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        let db = null;
+        let auth = null;
+        let userId = null;
+        let isAuthReady = false;
+        let watchListItems = {}; // {movieId: {title, ...}}
+
+        // State for Dark Mode - Defaults to true (Dark)
+        let isDarkMode = true; 
+
+        // DOM elements (assigned in DOMContentLoaded)
+        let navLinks = null; 
+        let bottomNav = null; 
+        let fab = null; 
+        let notificationModal = null;
+        const pages = ['intro', 'login', 'register', 'home', 'favorites', 'downloads', 'profile', 'watch'];
+        let currentMovie = null; 
+
+        // --- Custom Confirmation Modal Logic ---
+
+        let currentConfirmationCallback = null;
+
+        /**
+         * Displays a custom confirmation modal with Yes/No buttons.
+         */
+        function showConfirmation(title, message, callback) {
+            currentConfirmationCallback = callback;
+            document.getElementById('conf-title').textContent = title;
+            document.getElementById('conf-message').textContent = message;
+            document.getElementById('confirmation-modal').classList.remove('hidden');
+        }
+        window.showConfirmation = showConfirmation;
+
+        /**
+         * Hides the custom confirmation modal.
+         */
+        function hideConfirmation() {
+            currentConfirmationCallback = null;
+            document.getElementById('confirmation-modal').classList.add('hidden');
+        }
+
+        // Event listeners for the confirmation buttons
+        document.getElementById('conf-btn-yes').onclick = () => {
+            if (currentConfirmationCallback) {
+                currentConfirmationCallback();
+            }
+            hideConfirmation();
+        };
+
+        document.getElementById('conf-btn-no').onclick = () => {
+            hideConfirmation();
+        };
+
+        /**
+         * Handler for the Logout button click, triggering the confirmation modal.
+         */
+        function handleLogoutClick() {
+            showConfirmation(
+                "Confirm Logout",
+                "Are you sure you want to log out of your account?",
+                () => {
+                    navigateTo('intro');
+                    showUiMessage("You have been logged out.");
+                }
+            );
+        }
+        window.handleLogoutClick = handleLogoutClick;
+
+
+        /**
+         * Utility to replace alert/confirm (now a 1-second toast)
+         */
+        function showUiMessage(message) {
+            const box = document.getElementById('ui-message-box');
+            const text = document.getElementById('ui-message-text');
+            
+            text.textContent = message;
+            box.classList.remove('hidden');
+
+            setTimeout(() => {
+                box.classList.add('hidden');
+            }, 1000); 
+        }
+        window.showUiMessage = showUiMessage;
+        
+        // --- Notification Modal Functions (NEW) ---
+
+        /**
+         * Opens the slide-up notification modal.
+         */
+        function openNotificationModal() {
+            if (notificationModal) {
+                notificationModal.style.display = 'flex';
+                // Wait for display change before applying transition class
+                setTimeout(() => {
+                    notificationModal.classList.add('active');
+                }, 10);
+            }
+        }
+        window.openNotificationModal = openNotificationModal;
+
+        /**
+         * Closes the slide-up notification modal.
+         * Optionally takes an event to check if the click was on the overlay.
+         */
+        function closeNotificationModal(event) {
+            if (event && event.target.id !== 'notification-modal') {
+                return; // Only close if clicking the background overlay itself
+            }
+            
+            if (notificationModal) {
+                notificationModal.classList.remove('active');
+                // Wait for transition before hiding element
+                setTimeout(() => {
+                    notificationModal.style.display = 'none';
+                }, 400); 
+            }
+        }
+        window.closeNotificationModal = closeNotificationModal;
+
+
+        /**
+         * Defines and returns the movie data object.
+         */
+        function getMovieData() {
+            return {
+                'M-1': { id: 'M-1', title: 'Ballerina', year: 2024, description: 'A gripping tale of redemption and revenge in a neon-lit, futuristic Seoul. When a former bodyguard is hired to protect a pop star, she uncovers a vast conspiracy that stretches back to her own past.', videoUrl: 'https://www.youtube.com/embed/gW7S4bH639s?autoplay=1&controls=1', category: 'New Movies', image: 'https://placehold.co/200x300/10061e/8a2be2?text=BALLERINA' }, 
+                'M-2': { id: 'M-2', title: 'Fantastic 4', year: 2025, description: 'Four individuals gain remarkable powers after a cosmic ray exposure and must learn to use them to defend the world from a powerful, yet familiar, threat.', videoUrl: 'https://www.youtube.com/embed/Fw9Y8_Kk26g?autoplay=1&controls=1', category: 'New Movies', image: 'https://placehold.co/200x300/10061e/8a2be2?text=FANTASTIC+4' },
+                'M-3': { id: 'M-3', title: 'Wicked', year: 2024, description: 'The incredible untold story of the witches of Oz. Before Dorothy arrived, one with green skin and a fiery temper finds her true calling.', videoUrl: 'https://www.youtube.com/embed/szCjQ8_kRjM?autoplay=1&controls=1', category: 'New Movies', image: 'https://placehold.co/200x300/10061e/8a2be2?text=WICKED' },
+                'M-4': { id: 'M-4', title: 'The Fall Guy', year: 2024, description: 'A former stuntman springs back into action when the star of a new movie goes missing, attempting to win back the love of his life in the process.', videoUrl: 'https://www.youtube.com/embed/j7jPnwVGdZ8?autoplay=1&controls=1', category: 'Coming Soon', image: 'https://placehold.co/200x300/10061e/8a2be2?text=THE+FALL+GUY' },
+                'M-5': { id: 'M-5', title: 'Cake', year: 2023, description: 'A dark comedy about a baker who discovers her secret ingredient is the key to unimaginable wealth and unexpected danger.', videoUrl: 'https://www.youtube.com/embed/5T2F4oU3v1w?autoplay=1&controls=1', category: 'Coming Soon', image: 'https://placehold.co/200x300/10061e/8a2be2?text=Cake' },
+                'M-6': { id: 'M-6', title: 'Warrior', year: 2022, description: 'A historical drama following a young samurai who must choose between his family duty and the changing world of Meiji Japan.', videoUrl: 'https://www.youtube.com/embed/lCg8xVn1eA4?autoplay=1&controls=1', category: 'Coming Soon', image: 'https://placehold.co/200x300/10061e/8a2be2?text=Warrior' },
+                'M-7': { id: 'M-7', title: 'Suit', year: 2023, description: 'A financial thriller where a tailor discovers coded secrets woven into the fabric of a CEO\'s custom suit.', videoUrl: 'https://www.youtube.com/embed/k4J39xT4J9U?autoplay=1&controls=1', category: 'Coming Soon', image: 'https://placehold.co/200x300/10061e/8a2be2?text=Suit' },
+                'M-8': { id: 'M-8', title: 'STARFALL', year: 2025, description: 'The final season of the epic space opera. The crew of the Phoenix makes one last desperate jump to save humanity.', videoUrl: 'https://www.youtube.com/embed/Q4A7P4sW-R4?autoplay=1&controls=1', category: 'Trending Series', image: 'https://placehold.co/200x300/10061e/8a2be2?text=STARFALL' },
+                'M-9': { id: 'M-9', title: 'OMEGA 7', year: 2024, description: 'A team of genetically engineered soldiers must hunt down the rogue seventh member before he unleashes a weapon of mass destruction.', videoUrl: 'https://www.youtube.com/embed/m616i4P_y1Q?autoplay=1&controls=1', category: 'Trending Series', image: 'https://placehold.co/200x300/10061e/8a2be2?text=OMEGA+7' },
+                'M-10': { id: 'M-10', title: 'NIGHT OPS', year: 2023, description: 'An elite special forces team attempts a daring midnight rescue behind enemy lines, facing impossible odds and a digital enemy.', videoUrl: 'https://www.youtube.com/embed/3RryD2H5Y2g?autoplay=1&controls=1', category: 'Trending Series', image: 'https://placehold.co/200x300/10061e/8a2be2?text=NIGHT+OPS' },
+                'M-11': { id: 'M-11', title: 'THE GAME', year: 2023, description: 'In a world where life and death are decided by a high-stakes board game, a new player enters the arena seeking to challenge the master.', videoUrl: 'https://www.youtube.com/embed/WJqf0lO_U_g?autoplay=1&controls=1', category: 'Trending Series', image: 'https://placehold.co/200x300/10061e/8a2be2?text=THE+GAME' },
+                'M-12': { id: 'M-12', title: 'REBIRTH', year: 2024, description: 'A thrilling sci-fi series about a corporation that promises eternal life through digital consciousness transfer, with a sinister catch.', videoUrl: 'https://www.youtube.com/embed/U3H1vA29Wf4?autoplay=1&controls=1', category: 'Trending Series', image: 'https://placehold.co/200x300/10061e/8a2be2?text=REBIRTH' },
+                'M-13': { id: 'M-13', title: 'WITCH TOWN', year: 2023, description: 'A cozy mystery series set in a small town where magic is real but treated as a common nuisance by the local detective.', videoUrl: 'https://www.youtube.com/embed/1vRzNqXk70s?autoplay=1&controls=1', category: 'Trending Series', image: 'https://placehold.co/200x300/10061e/8a2be2?text=WITCH+TOWN' },
+            };
+        }
+        
+        const movieData = getMovieData();
+        const moviesArray = Object.values(movieData);
+
+
+        // --- Firebase Core Logic for Watchlist ---
+
+        /**
+         * Toggles a movie's presence in the user's watchlist in Firestore.
+         */
+        async function toggleWatchlistItem(movieId) {
+            if (!db || !userId || !isAuthReady) {
+                // Local simulation for environments without Firebase
+                const isSaved = !!watchListItems[movieId];
+                if (isSaved) {
+                    delete watchListItems[movieId];
+                    showUiMessage(Simulated: Removed ${movieData[movieId].title} from Watchlist.);
+                } else {
+                    watchListItems[movieId] = movieData[movieId];
+                    showUiMessage(Simulated: Added ${movieData[movieId].title} to Watchlist!);
+                }
+                renderHomeContent();
+                renderFavoritesPage();
+                if (document.getElementById('watch').classList.contains('active')) {
+                    renderWatchPage();
+                }
+                return; 
+            }
+
+            const movie = movieData[movieId];
+            if (!movie) {
+                showUiMessage("Error: Movie data not found.");
+                return;
+            }
+
+            try {
+                const docRef = doc(db, artifacts/${appId}/users/${userId}/watchlist, movieId);
+                const isSaved = !!watchListItems[movieId];
+
+                if (isSaved) {
+                    await deleteDoc(docRef);
+                    showUiMessage(${movie.title} removed from Watchlist.);
+                } else {
+                    const dataToSave = { ...movie, addedAt: new Date().toISOString() };
+                    await setDoc(docRef, dataToSave);
+                    showUiMessage(${movie.title} added to Watchlist!);
+                }
+            } catch (error) {
+                console.error("Error toggling watchlist item:", error);
+                showUiMessage("Failed to update watchlist due to a database error.");
+            }
+        }
+        window.toggleWatchlistItem = toggleWatchlistItem;
+
+        /**
+         * Sets up the real-time listener for the user's watchlist.
+         */
+        function setupWatchlistListener() {
+            if (!db || !userId || !firebaseConfig) {
+                 console.warn("Skipping Firestore listener setup in local environment.");
+                 return;
+            }
+
+            if (isAuthReady) {
+                loadDarkModePreference(); // Load the theme preference
+            }
+
+            const watchlistColRef = collection(db, artifacts/${appId}/users/${userId}/watchlist);
+            const watchlistQuery = query(watchlistColRef);
+
+            onSnapshot(watchlistQuery, (snapshot) => {
+                const newWatchlist = {};
+                snapshot.forEach((doc) => {
+                    newWatchlist[doc.id] = doc.data();
+                });
+
+                watchListItems = newWatchlist;
+                
+                renderHomeContent();
+                renderFavoritesPage();
+                
+                if (document.getElementById('watch').classList.contains('active')) {
+                    renderWatchPage();
+                }
+
+            }, (error) => {
+                console.error("Error listening to watchlist:", error);
+                showUiMessage("Failed to load watchlist data in real-time.");
+            });
+        }
+
+
+        // --- Dark Mode UI and Persistence Logic ---
+
+        /**
+         * Saves the current Dark Mode preference to Firestore.
+         */
+        async function saveDarkModePreference() {
+            if (!db || !userId || !isAuthReady) {
+                 console.warn("Cannot save dark mode preference: Firebase not ready. Simulating save.");
+                 return;
+            }
+
+            try {
+                const settingsDocRef = doc(db, artifacts/${appId}/users/${userId}/settings/user_preferences);
+                await setDoc(settingsDocRef, {
+                    isDarkMode: isDarkMode
+                }, { merge: true }); 
+
+            } catch (error) {
+                console.error("Error saving dark mode preference:", error);
+                showUiMessage("Failed to save preference.");
+            }
+        }
+
+        /**
+         * Loads the Dark Mode preference from Firestore.
+         */
+        async function loadDarkModePreference() {
+            if (!db || !userId || !isAuthReady) {
+                 return;
+            }
+
+            try {
+                const settingsDocRef = doc(db, artifacts/${appId}/users/${userId}/settings/user_preferences);
+                const docSnap = await getDoc(settingsDocRef);
+
+                if (docSnap.exists()) {
+                    isDarkMode = docSnap.data().isDarkMode ?? true; 
+                } else {
+                     isDarkMode = true;
+                }
+                // Apply the loaded state to the UI immediately
+                applyDarkModeState(isDarkMode);
+
+            } catch (error) {
+                console.error("Error loading dark mode preference:", error);
+            }
+        }
+
+        /**
+         * Applies the dark mode state to the UI by adding/removing the 'light-mode' class.
+         * @param {boolean} mode 
+         */
+        function applyDarkModeState(mode) {
+             const appContainer = document.querySelector('.app-container');
+             const toggleSwitch = document.getElementById('dark-mode-toggle');
+             
+             if (appContainer) {
+                 if (mode) {
+                     // Dark Mode Active (Default)
+                     appContainer.classList.remove('light-mode');
+                     if (toggleSwitch) toggleSwitch.classList.add('active');
+                 } else {
+                     // Light Mode Active
+                     appContainer.classList.add('light-mode');
+                     if (toggleSwitch) toggleSwitch.classList.remove('active');
+                 }
+             }
+        }
+
+        /**
+         * Handles the click on the Dark Mode toggle switch.
+         */
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            applyDarkModeState(isDarkMode); // Apply visual change
+            saveDarkModePreference(); // Save to Firestore
+            showUiMessage(isDarkMode ? "Dark Mode Activated" : "Light Mode Activated");
+        }
+        window.toggleDarkMode = toggleDarkMode;
+
+        /**
+         * Renders the Profile page, specifically initializing the dark mode toggle state.
+         */
+        function renderProfilePage() {
+            applyDarkModeState(isDarkMode); 
+        }
+
+        // --- UI Rendering Functions ---
+
+        /**
+         * Renders a single movie card HTML template.
+         */
+        function renderMovieCard(movie) {
+            const isSaved = !!watchListItems[movie.id];
+            const heartClass = isSaved ? 'fa-solid saved' : 'fa-regular';
+
+            return `
+                <div class="movie-card-wrapper">
+                    <!-- Heart Icon for Watchlist -->
+                    <button class="watchlist-toggle-btn ${isSaved ? 'saved' : ''}" onclick="event.stopPropagation(); toggleWatchlistItem('${movie.id}')">
+                        <i id="heart-${movie.id}" class="${heartClass} fa-heart"></i>
+                    </button>
+                    <!-- Movie Thumbnail -->
+                    <div class="movie-card-thumb" 
+                         style="background-image: url('${movie.image}');"
+                         onclick="watchMovie('${movie.id}')"
+                    ></div>
+                </div>
+            `;
+        }
+
+        /**
+         * Renders the dynamic grids on the Home Page.
+         */
+        function renderHomeContent() {
+            const newMoviesGrid = document.getElementById('new-movies-grid');
+            const comingSoonGrid = document.getElementById('coming-soon-grid');
+            const trendingSeriesGrid = document.getElementById('trending-series-grid');
+            
+            if (!newMoviesGrid || !comingSoonGrid || !trendingSeriesGrid) return; 
+
+            const getCards = (category) => moviesArray
+                .filter(m => m.category === category)
+                .map(renderMovieCard)
+                .join('');
+
+            if (newMoviesGrid) newMoviesGrid.innerHTML = getCards('New Movies');
+            if (comingSoonGrid) comingSoonGrid.innerHTML = getCards('Coming Soon');
+            if (trendingSeriesGrid) trendingSeriesGrid.innerHTML = getCards('Trending Series');
+        }
+
+        /**
+         * Renders the content for the Favorites/Watchlist page.
+         */
+        function renderFavoritesPage() {
+            const favoritesArea = document.getElementById('favorites-content-area');
+            if (!favoritesArea) return;
+
+            const savedMovies = Object.values(watchListItems).sort((a, b) => {
+                const dateA = a.addedAt ? new Date(a.addedAt) : new Date(0);
+                const dateB = b.addedAt ? new Date(b.addedAt) : new Date(0);
+                return dateB - dateA;
+            });
+
+            if (savedMovies.length === 0) {
+                favoritesArea.innerHTML = `
+                    <div class="center-message">
+                        <i class="fa-regular fa-heart center-icon"></i>
+                        <p class="text-2xl text-gray-400">No Movies in Watchlist</p>
+                        <p class="text-lg text-gray-500 mt-2">Find a movie on the Home tab and tap the heart icon to add it.</p>
+                    </div>
+                `;
+            } else {
+                const movieCards = savedMovies.map(renderMovieCard).join('');
+                favoritesArea.innerHTML = `
+                    <p class="text-sm text-gray-400 mb-4">You have ${savedMovies.length} movies in your Watchlist.</p>
+                    <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
+                        ${movieCards}
+                    </div>
+                `;
+            }
+        }
+
+
+        /**
+         * Updates the watch page with the selected movie's details.
+         */
+        function renderWatchPage() {
+            if (!currentMovie) return;
+
+            document.getElementById('watch-movie-title').textContent = currentMovie.title;
+            document.getElementById('watch-movie-year').textContent = currentMovie.year;
+            document.getElementById('watch-movie-description').textContent = currentMovie.description;
+
+            const player = document.getElementById('video-player-iframe');
+            player.src = currentMovie.videoUrl;
+
+            const watchBtnContainer = document.getElementById('watch-watchlist-btn');
+            const isSaved = !!watchListItems[currentMovie.id];
+            
+            if (watchBtnContainer) {
+                watchBtnContainer.setAttribute('onclick', toggleWatchlistItem('${currentMovie.id}'));
+                
+                const watchIcon = watchBtnContainer.querySelector('i');
+                if (watchIcon) {
+                    watchIcon.className = isSaved ? 'fa-solid fa-heart text-2xl' : 'fa-regular fa-heart text-2xl';
+                    watchIcon.style.color = isSaved ? '#ff5277' : ''; // Use default purple accent if not saved
+                }
+                
+                if (isSaved) {
+                    watchBtnContainer.classList.add('saved');
+                } else {
+                    watchBtnContainer.classList.remove('saved');
+                }
+            }
+        }
+
+        /**
+         * Stops the video playback before navigating away from the watch page.
+         */
+        function stopVideoPlayback() {
+            const player = document.getElementById('video-player-iframe');
+            player.src = ""; 
+        }
+
+        /**
+         * Sets the movie to watch, renders the watch page, and navigates.
+         */
+        function watchMovie(movieId) {
+            currentMovie = movieData[movieId];
+            if (currentMovie) {
+                renderWatchPage();
+                navigateTo('watch');
+            } else {
+                showUiMessage(Movie data for ID "${movieId}" not found. Cannot view details.);
+            }
+        }
+        window.watchMovie = watchMovie; 
+
+        /**
+         * Navigates to a specific page ID and updates the UI accordingly.
+         */
+        function navigateTo(pageId) {
+            if (!pages.includes(pageId)) {
+                console.error(Page ID "${pageId}" not found.);
+                return;
+            }
+
+            if (document.getElementById('watch').classList.contains('active') && pageId !== 'watch') {
+                stopVideoPlayback();
+            }
+            
+            closeNotificationModal(); // Close modal on page navigation
+            hideConfirmation();
+
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+                page.scrollTop = 0;
+            });
+
+            const targetPage = document.getElementById(pageId);
+            targetPage.classList.add('active');
+
+            if (pageId === 'profile' && isAuthReady) {
+                renderProfilePage();
+            }
+
+            const navPages = ['home', 'favorites', 'downloads'];
+            if (bottomNav) {
+                if (navPages.includes(pageId)) {
+                    bottomNav.classList.remove('hidden');
+                } else {
+                    bottomNav.classList.add('hidden');
+                }
+            }
+
+            if (navLinks) {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.dataset.page === pageId) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+
+            if (pageId === 'home') {
+                document.querySelector('.nav-link[data-page="home"]').classList.add('active');
+            }
+
+            if (fab) {
+                 if (pageId === 'favorites') {
+                    fab.classList.remove('hidden');
+                } else {
+                    fab.classList.add('hidden');
+                }
+            }
+           
+        }
+        window.navigateTo = navigateTo; 
+
+        // --- Initialization ---
+
+        async function initializeFirebase() {
+            if (!firebaseConfig) {
+                 console.warn("Firebase config is missing. Running in local fallback mode.");
+                 isAuthReady = true; 
+                 return;
+            }
+            
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        isAuthReady = true;
+                        setupWatchlistListener(); 
+                    } else {
+                        userId = crypto.randomUUID(); 
+                        isAuthReady = true;
+                        setupWatchlistListener();
+                        showUiMessage("Signed in anonymously. Watchlist is only saved temporarily.");
+                    }
+                    
+                    const initialPage = window.location.hash.substring(1) || 'intro';
+                    navigateTo(initialPage);
+                });
+
+            } catch (e) {
+                console.error("Firebase initialization failed:", e);
+                showUiMessage("Application failed to connect to the database. Running locally without data persistence.");
+            }
+        }
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            navLinks = document.querySelectorAll('#bottom-nav .nav-link');
+            bottomNav = document.getElementById('bottom-nav');
+            fab = document.getElementById('floating-add-btn');
+            notificationModal = document.getElementById('notification-modal');
+
+            renderHomeContent();
+            renderFavoritesPage();
+            
+            // Set initial dark mode state to dark before loading preference
+            applyDarkModeState(true);
+            
+            initializeFirebase();
+
+            const initialPage = window.location.hash.substring(1) || 'intro';
+            navigateTo(initialPage);
+        });
+    </script>
+</body>
+</html>
